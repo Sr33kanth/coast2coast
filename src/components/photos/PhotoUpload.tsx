@@ -23,10 +23,16 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ userId, onSuccess, adminMode 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [manualLat, setManualLat] = useState<string>('');
+  const [manualLng, setManualLng] = useState<string>('');
   const [location, setLocation] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<{ display_name: string; lat: string; lon: string }[]>([]);
+  const [searchActive, setSearchActive] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>();
+  const { register, handleSubmit, reset } = useForm<FormValues>();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -64,6 +70,9 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ userId, onSuccess, adminMode 
   const getLocation = async () => {
     setIsLoading(true);
     setError(null);
+    // Clear manual if using geolocation
+    setManualLat('');
+    setManualLng('');
 
     try {
       if (!navigator.geolocation) {
@@ -95,8 +104,22 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ userId, onSuccess, adminMode 
   const onSubmit = async (data: FormValues) => {
     const effectiveUserId = adminMode ? customUserId : userId;
 
-    if (!selectedFile || !coords) {
-      setError('Please select a photo and get your location first');
+    // Validate location: use manual if provided, else current coords
+    let lat: number | null = null;
+    let lng: number | null = null;
+    if (manualLat && manualLng) {
+      lat = parseFloat(manualLat);
+      lng = parseFloat(manualLng);
+      if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+        setError('Please enter valid latitude and longitude values.');
+        return;
+      }
+    } else if (coords) {
+      lat = coords.lat;
+      lng = coords.lng;
+    }
+    if (!selectedFile || ((manualLat && manualLng) ? (lat === null || lng === null) : !coords)) {
+      setError('Please select a photo and provide a valid location (current or manual).');
       return;
     }
 
@@ -108,14 +131,16 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ userId, onSuccess, adminMode 
         url: '', // This will be filled by the server
         caption: data.caption,
         location,
-        lat: coords.lat,
-        lng: coords.lng,
+        lat: lat as number,
+        lng: lng as number,
       }, effectiveUserId, selectedFile);
 
       if (photo) {
         reset();
         clearFile();
         setCoords(null);
+        setManualLat('');
+        setManualLng('');
         setLocation('');
         if (onSuccess) onSuccess();
       } else {
@@ -201,13 +226,69 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ userId, onSuccess, adminMode 
           </div>
         </div>
 
-        {/* Location */}
+        {/* Location Search/Selection */}
         <div className="mb-4">
+          {/* Location Search */}
+          <div className="mb-2 relative">
+            <input
+              type="text"
+              placeholder="Search for a location (city, landmark, etc)"
+              value={searchQuery}
+              onChange={async (e) => {
+                setSearchQuery(e.target.value);
+                setSearchActive(true);
+                setManualLat(''); setManualLng(''); setCoords(null);
+                if (e.target.value.length < 3) {
+                  setSearchResults([]);
+                  return;
+                }
+                setSearchLoading(true);
+                try {
+                  const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(e.target.value)}`);
+                  const data = await res.json();
+                  setSearchResults(data);
+                } catch (err) {
+                  setSearchResults([]);
+                } finally {
+                  setSearchLoading(false);
+                }
+              }}
+              className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+              disabled={!!coords || !!manualLat || !!manualLng}
+              autoComplete="off"
+            />
+            {searchActive && searchQuery.length >= 3 && (
+              <div className="absolute z-20 bg-white border border-slate-200 rounded shadow w-full mt-1 max-h-40 overflow-y-auto">
+                {searchLoading && <div className="p-2 text-slate-400 text-sm">Searching...</div>}
+                {searchResults.map((result, idx) => (
+                  <div
+                    key={idx}
+                    className="p-2 hover:bg-blue-50 cursor-pointer text-sm"
+                    onClick={() => {
+                      setManualLat(result.lat);
+                      setManualLng(result.lon);
+                      setLocation(result.display_name);
+                      setSearchQuery(result.display_name);
+                      setSearchActive(false);
+                      setSearchResults([]);
+                    }}
+                  >
+                    {result.display_name}
+                  </div>
+                ))}
+                {!searchLoading && searchResults.length === 0 && (
+                  <div className="p-2 text-slate-400 text-sm">No results</div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Get Current Location Button */}
           <button
             type="button"
             onClick={getLocation}
-            disabled={isLoading}
-            className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold py-2 px-4 rounded-lg border border-blue-200 flex items-center justify-center transition-colors"
+            disabled={isLoading || !!manualLat || !!manualLng || !!searchQuery}
+            className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold py-2 px-4 rounded-lg border border-blue-200 flex items-center justify-center transition-colors mb-2"
           >
             {isLoading ? (
               <>
@@ -224,14 +305,45 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ userId, onSuccess, adminMode 
               </>
             )}
           </button>
-          
-          {coords && (
+
+          {/* Manual Lat/Lng Entry */}
+          <div className="flex gap-2 mt-2">
+            <input
+              type="text"
+              inputMode="decimal"
+              pattern="^-?\d*(\.\d*)?$"
+              placeholder="Latitude"
+              value={manualLat}
+              onChange={e => {
+                setManualLat(e.target.value);
+                setManualLng(''); setCoords(null); setSearchQuery(''); setSearchResults([]); setSearchActive(false);
+              }}
+              className="w-1/2 px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+              disabled={!!coords || !!searchQuery}
+            />
+            <input
+              type="text"
+              inputMode="decimal"
+              pattern="^-?\d*(\.\d*)?$"
+              placeholder="Longitude"
+              value={manualLng}
+              onChange={e => {
+                setManualLng(e.target.value);
+                setManualLat(''); setCoords(null); setSearchQuery(''); setSearchResults([]); setSearchActive(false);
+              }}
+              className="w-1/2 px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+              disabled={!!coords || !!searchQuery}
+            />
+          </div>
+
+          {/* Location Preview */}
+          {(coords || (manualLat && manualLng)) && (
             <div className="mt-2 p-3 bg-blue-50 rounded-lg">
               <p className="text-sm font-medium text-blue-700">
-                Location: {location || 'Unknown location'}
+                Location: {location || searchQuery || 'Unknown location'}
               </p>
               <p className="text-xs text-blue-600">
-                Coordinates: {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
+                Coordinates: {manualLat && manualLng ? `${manualLat}, ${manualLng}` : coords ? `${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}` : ''}
               </p>
             </div>
           )}
@@ -261,7 +373,17 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ userId, onSuccess, adminMode 
           type="submit" 
           variant="secondary"
           isLoading={isLoading}
-          disabled={!selectedFile || !coords || isLoading} 
+          disabled={
+            !selectedFile ||
+            (
+              // Must have EITHER valid manual OR valid coords
+              !(
+                (manualLat && manualLng && !isNaN(parseFloat(manualLat)) && !isNaN(parseFloat(manualLng)) && Math.abs(parseFloat(manualLat)) <= 90 && Math.abs(parseFloat(manualLng)) <= 180)
+                || coords
+              )
+            )
+            || isLoading
+          }
           className="w-full"
         >
           Upload Photo

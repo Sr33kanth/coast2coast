@@ -76,6 +76,32 @@ export async function addPhoto(
   };
 }
 
+export async function deletePhoto(photoId: string, storagePath: string): Promise<boolean> {
+  // 1. Delete from storage
+  const { error: storageError } = await supabase
+    .storage
+    .from('trip-photos')
+    .remove([storagePath]);
+
+  if (storageError) {
+    console.error('Error deleting file from storage:', storageError);
+    return false;
+  }
+
+  // 2. Delete from database
+  const { error: dbError } = await supabase
+    .from('photos')
+    .delete()
+    .eq('id', photoId);
+
+  if (dbError) {
+    console.error('Error deleting photo from database:', dbError);
+    return false;
+  }
+
+  return true;
+}
+
 export function subscribeToPhotos(callback: (photos: Photo[]) => void) {
   const subscription = supabase
     .channel('photos_changes')
