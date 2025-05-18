@@ -5,6 +5,8 @@ import CheckinForm from '../components/checkins/CheckinForm';
 import { formatDate } from '../utils/helpers';
 import { getCheckIns } from '../services/checkins';
 import { getPhotos } from '../services/photos';
+import AboutSection from '../components/layout/AboutSection';
+import GuestbookSection from '../components/guestbook/GuestbookSection';
 
 const Home: React.FC = () => {
   // Temporary userId for demo purposes - in a real app, this would come from auth
@@ -84,33 +86,7 @@ const Home: React.FC = () => {
           <div className="lg:col-span-2">
             <MapView />
             
-            <div className="mt-8">
-              <h3 className="text-xl font-bold mb-4">About Our Trip</h3>
-              <div className="bg-white rounded-xl shadow-md p-6">
-                <p className="mb-4">
-                  We're embarking on an epic coast-to-coast road trip across America, from the iconic Golden Gate Bridge in San Francisco to the towering Empire State Building in New York City. Along the way, we'll be documenting our adventures, sharing photos, and checking in from various locations.
-                </p>
-                <p className="mb-4">
-                  Our journey will take us through stunning national parks, quirky roadside attractions, bustling cities, and charming small towns. We plan to explore hidden gems, try local cuisines, and immerse ourselves in the diverse cultures that make America so unique.
-                </p>
-                <p>
-                  We invite you to follow along, leave comments, and experience this adventure with us in real-time through our interactive map and photo gallery. Feel free to sign our digital guestbook and share your own road trip tips or experiences!
-                </p>
-                
-                <div className="mt-6 grid grid-cols-2 gap-4 text-center">
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h4 className="font-bold text-blue-700">Start</h4>
-                    <p>San Francisco, CA</p>
-                    <p className="text-sm text-blue-500">{formatDate('2025-01-01')}</p>
-                  </div>
-                  <div className="bg-purple-50 p-4 rounded-lg">
-                    <h4 className="font-bold text-purple-700">Finish</h4>
-                    <p>New York, NY</p>
-                    <p className="text-sm text-purple-500">{formatDate('2025-01-21')}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* About and Guestbook now moved below grid */}
           </div>
           
           {/* Sidebar */}
@@ -142,6 +118,12 @@ const Home: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* About Section (full width) */}
+      <AboutSection />
+
+      {/* Guestbook Section (full width, bottom) */}
+      <GuestbookSection />
     </div>
   );
 };
