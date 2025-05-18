@@ -14,13 +14,6 @@ const GuestbookSection: React.FC = () => (
         <div className="order-1 md:order-2">
           <h4 className="text-lg font-semibold mb-4">Leave a Message</h4>
           <GuestbookForm />
-          <div className="bg-white rounded-xl shadow-md p-4 mt-8">
-            <h5 className="font-bold text-base mb-2">Traveler's Wisdom</h5>
-            <div className="italic text-slate-600 border-l-4 border-purple-200 pl-4 py-2">
-              "The real voyage of discovery consists not in seeking new landscapes, but in having new eyes."
-              <div className="text-right mt-2 text-xs font-medium">— Marcel Proust</div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -12,7 +12,6 @@ const Header: React.FC = () => {
   const navItems = [
     { name: 'Map', path: '/', icon: <Map className="w-5 h-5" /> },
     { name: 'Photos', path: '/photos', icon: <Camera className="w-5 h-5" /> },
-    { name: 'Guestbook', path: '/guestbook', icon: <MessageSquare className="w-5 h-5" /> },
     { name: 'Admin', path: '/admin', icon: <Route className="w-5 h-5" /> },
   ];
 
@@ -53,7 +52,7 @@ const Header: React.FC = () => {
             >
               <Map className="w-5 h-5 text-white" />
             </motion.div>
-            <span className={`font-bold text-xl transition-colors duration-300 ${isScrolled ? 'text-slate-900' : 'text-white'}`}>
+            <span className={`font-bold text-xl transition-colors duration-300 ${location.pathname === '/' ? 'text-white' : 'text-slate-900'}`}>
               Coast2Coast
             </span>
           </Link>
@@ -65,7 +64,7 @@ const Header: React.FC = () => {
                 <Button 
                   variant={location.pathname === item.path ? 'primary' : 'ghost'} 
                   size="sm"
-                  className={location.pathname === item.path ? '' : `${isScrolled ? 'text-slate-700' : 'text-white'}`}
+                  className={location.pathname === item.path ? '' : `${location.pathname === '/' ? 'text-white' : 'text-slate-700'}`}
                   icon={item.icon}
                 >
                   {item.name}

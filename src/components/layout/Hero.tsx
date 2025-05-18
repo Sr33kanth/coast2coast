@@ -57,40 +57,12 @@ const Hero: React.FC = () => {
         <div className="w-full h-0.5 border-t-2 border-dashed border-white/50"></div>
       </div>
 
-      {/* San Francisco Marker */}
-      <motion.div 
-        initial={{ y: 50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2, duration: 0.8 }}
-        className="absolute left-16 md:left-32 top-1/2 transform -translate-y-1/2"
-      >
-        <div className="flex flex-col items-center">
-          <MapPin className="w-8 h-8 text-red-500" />
-          <div className="mt-2 bg-white/10 backdrop-blur-md rounded-lg p-2">
-            <p className="text-white font-bold">San Francisco</p>
-            <p className="text-blue-200 text-xs">Starting Point</p>
-          </div>
-        </div>
-      </motion.div>
 
-      {/* New York Marker */}
-      <motion.div 
-        initial={{ y: 50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.4, duration: 0.8 }}
-        className="absolute right-16 md:right-32 top-1/2 transform -translate-y-1/2"
-      >
-        <div className="flex flex-col items-center">
-          <MapPin className="w-8 h-8 text-red-500" />
-          <div className="mt-2 bg-white/10 backdrop-blur-md rounded-lg p-2">
-            <p className="text-white font-bold">New York</p>
-            <p className="text-blue-200 text-xs">Destination</p>
-          </div>
-        </div>
-      </motion.div>
 
-      {/* Content */}
-      <div className="relative h-full flex flex-col items-center justify-center text-white text-center px-4">
+
+
+      {/* Content: Move heading and subtitle higher */}
+      <div className="relative h-full flex flex-col items-center justify-start pt-32 text-white text-center px-4">
         <motion.h1 
           className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-transparent"
           initial={{ y: -50, opacity: 0 }}
@@ -109,19 +81,48 @@ const Hero: React.FC = () => {
             Follow our epic road trip journey from the Golden Gate to the Empire State
           </p>
         </motion.div>
-        <motion.div
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.8 }}
-          className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4"
-        >
-          <a href="#map-section" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-lg transform transition hover:scale-105 shadow-lg">
-            Explore the Journey
-          </a>
-          <a href="#latest-update" className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-bold py-3 px-6 rounded-lg border border-white/30 transform transition hover:scale-105">
-            Latest Update
-          </a>
-        </motion.div>
+      </div>
+
+      {/* San Francisco Marker */}
+      <motion.div 
+        initial={{ y: 50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.8 }}
+        className="absolute left-16 md:left-32 top-2/3 transform -translate-y-1/2"
+      >
+        <div className="flex flex-col items-center">
+          <MapPin className="w-8 h-8 text-red-500" />
+          <div className="mt-2 bg-white/10 backdrop-blur-md rounded-lg p-2">
+            <p className="text-white font-bold">San Francisco</p>
+            <p className="text-blue-200 text-xs">Starting Point</p>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* New York Marker */}
+      <motion.div 
+        initial={{ y: 50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.4, duration: 0.8 }}
+        className="absolute right-16 md:right-32 top-2/3 transform -translate-y-1/2"
+      >
+        <div className="flex flex-col items-center">
+          <MapPin className="w-8 h-8 text-red-500" />
+          <div className="mt-2 bg-white/10 backdrop-blur-md rounded-lg p-2">
+            <p className="text-white font-bold">New York</p>
+            <p className="text-blue-200 text-xs">Destination</p>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Buttons: below markers for mobile, keep visible for desktop */}
+      <div className="relative flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 items-center justify-center mt-8 z-10">
+        <a href="#map-section" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-lg transform transition hover:scale-105 shadow-lg">
+          Explore the Journey
+        </a>
+        <a href="#latest-update" className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-bold py-3 px-6 rounded-lg border border-white/30 transform transition hover:scale-105">
+          Latest Update
+        </a>
       </div>
 
       {/* Scroll Indicator */}

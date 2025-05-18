@@ -113,12 +113,6 @@ const MapView: React.FC = () => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {/* Preset Route Line */}
-        <Polyline
-          positions={presetRoute}
-          pathOptions={{ color: '#6366F1', weight: 3, opacity: 0.7, dashArray: '5, 10' }}
-        />
-
         {/* Route Stops */}
         {routeStops.map((stop) => (
           <Marker

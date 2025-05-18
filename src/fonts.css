@@ -1,0 +1,13 @@
+/* Import a storybook font from Google Fonts */
+.storybook-font {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.35rem;
+  line-height: 2.2rem;
+  letter-spacing: 0.01em;
+}
+
+.storybook-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem;
+  letter-spacing: 0.04em;
+}
