@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const LoginPage: React.FC = () => {
   const { signIn, loading } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -14,6 +16,7 @@ const LoginPage: React.FC = () => {
     setIsSubmitting(true);
     try {
       await signIn(email, password);
+      navigate('/admin');
     } catch (err: any) {
       setError(err.message || 'Login failed');
     } finally {

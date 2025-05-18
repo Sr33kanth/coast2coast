@@ -81,8 +81,16 @@ const Hero: React.FC = () => {
             Follow our epic road trip journey from the Golden Gate to the Empire State
           </p>
         </motion.div>
+        {/* Photo Gallery Button */}
+        <div className="flex justify-center mt-6">
+          <a
+            href="/photos"
+            className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-bold py-3 px-8 rounded-full shadow-lg text-lg transition-all duration-200 transform hover:scale-105"
+          >
+            View Photo Gallery
+          </a>
+        </div>
       </div>
-
       {/* San Francisco Marker */}
       <motion.div 
         initial={{ y: 50, opacity: 0 }}
@@ -115,15 +123,6 @@ const Hero: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* Buttons: below markers for mobile, keep visible for desktop */}
-      <div className="relative flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 items-center justify-center mt-8 z-10">
-        <a href="#map-section" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-lg transform transition hover:scale-105 shadow-lg">
-          Explore the Journey
-        </a>
-        <a href="#latest-update" className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-bold py-3 px-6 rounded-lg border border-white/30 transform transition hover:scale-105">
-          Latest Update
-        </a>
-      </div>
 
       {/* Scroll Indicator */}
       <motion.div 

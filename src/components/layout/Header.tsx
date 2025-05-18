@@ -10,7 +10,6 @@ const Header: React.FC = () => {
   const location = useLocation();
 
   const navItems = [
-    { name: 'Map', path: '/', icon: <Map className="w-5 h-5" /> },
     { name: 'Photos', path: '/photos', icon: <Camera className="w-5 h-5" /> },
     { name: 'Admin', path: '/admin', icon: <Route className="w-5 h-5" /> },
   ];
