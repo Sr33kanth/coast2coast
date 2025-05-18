@@ -26,6 +26,13 @@ const RouteEditor: React.FC<RouteEditorProps> = ({ userId }) => {
   const [editingStop, setEditingStop] = useState<RouteStop | null>(null);
   const [showForm, setShowForm] = useState<boolean>(false);
 
+  // Location search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<{ display_name: string; lat: string; lon: string }[]>([]);
+  const [searchActive, setSearchActive] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [selectedResult, setSelectedResult] = useState<{ display_name: string; lat: string; lon: string } | null>(null);
+
   const { 
     register, 
     handleSubmit, 
@@ -179,79 +186,93 @@ const RouteEditor: React.FC<RouteEditorProps> = ({ userId }) => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label htmlFor="location" className="block text-sm font-medium text-slate-700 mb-1">
-                    Location Name
-                  </label>
-                  <input
-                    id="location"
-                    type="text"
-                    {...register('location', { required: 'Location is required' })}
-                    className={`w-full px-3 py-2 border ${errors.location ? 'border-red-500' : 'border-slate-300'} rounded-md`}
-                    placeholder="e.g., Chicago, IL"
-                  />
-                  {errors.location && (
-                    <p className="text-red-500 text-xs mt-1">{errors.location.message}</p>
-                  )}
-                </div>
+              {/* Location Search/Selection */}
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+  <div className="md:col-span-2">
+    <label htmlFor="location-search" className="block text-sm font-medium text-slate-700 mb-1">
+      Search for Location
+    </label>
+    <input
+      id="location-search"
+      type="text"
+      value={searchQuery}
+      onChange={async (e) => {
+        setSearchQuery(e.target.value);
+        setSearchActive(true);
+        setValue('location', '');
+        setValue('lat', 0);
+        setValue('lng', 0);
+        if (e.target.value.length < 3) {
+          setSearchResults([]);
+          return;
+        }
+        setSearchLoading(true);
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(e.target.value)}`);
+          const data = await res.json();
+          setSearchResults(data);
+        } catch (err) {
+          setSearchResults([]);
+        } finally {
+          setSearchLoading(false);
+        }
+      }}
+      className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+      placeholder="Search city, landmark, etc."
+      autoComplete="off"
+      disabled={!!selectedResult}
+    />
+    {searchActive && searchQuery.length >= 3 && (
+      <div className="absolute z-20 bg-white border border-slate-200 rounded shadow w-full mt-1 max-h-40 overflow-y-auto">
+        {searchLoading && <div className="p-2 text-slate-400 text-sm">Searching...</div>}
+        {searchResults.map((result, idx) => (
+          <div
+            key={idx}
+            className="p-2 hover:bg-blue-50 cursor-pointer text-sm"
+            onClick={() => {
+              setValue('location', result.display_name);
+              setValue('lat', parseFloat(result.lat));
+              setValue('lng', parseFloat(result.lon));
+              setSearchQuery(result.display_name);
+              setSelectedResult(result);
+              setSearchActive(false);
+              setSearchResults([]);
+            }}
+          >
+            {result.display_name}
+          </div>
+        ))}
+        {!searchLoading && searchResults.length === 0 && (
+          <div className="p-2 text-slate-400 text-sm">No results</div>
+        )}
+      </div>
+    )}
+    {selectedResult && (
+      <div className="flex items-center mt-2">
+        <span className="text-xs text-blue-700 mr-2">{selectedResult.display_name}</span>
+        <button type="button" className="text-xs text-red-500 underline" onClick={() => {
+          setSelectedResult(null);
+          setSearchQuery('');
+          setValue('location', '');
+          setValue('lat', 0);
+          setValue('lng', 0);
+        }}>Clear</button>
+      </div>
+    )}
+  </div>
+  <div>
+    <label htmlFor="planned_date" className="block text-sm font-medium text-slate-700 mb-1">
+      Planned Date (optional)
+    </label>
+    <input
+      id="planned_date"
+      type="date"
+      {...register('planned_date')}
+      className="w-full px-3 py-2 border border-slate-300 rounded-md"
+    />
+  </div>
+</div>
 
-                <div>
-                  <label htmlFor="planned_date" className="block text-sm font-medium text-slate-700 mb-1">
-                    Planned Date (optional)
-                  </label>
-                  <input
-                    id="planned_date"
-                    type="date"
-                    {...register('planned_date')}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label htmlFor="lat" className="block text-sm font-medium text-slate-700 mb-1">
-                    Latitude
-                  </label>
-                  <input
-                    id="lat"
-                    type="number"
-                    step="any"
-                    {...register('lat', { 
-                      required: 'Latitude is required',
-                      min: { value: -90, message: 'Min value is -90' },
-                      max: { value: 90, message: 'Max value is 90' }
-                    })}
-                    className={`w-full px-3 py-2 border ${errors.lat ? 'border-red-500' : 'border-slate-300'} rounded-md`}
-                    placeholder="e.g., 41.8781"
-                  />
-                  {errors.lat && (
-                    <p className="text-red-500 text-xs mt-1">{errors.lat.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label htmlFor="lng" className="block text-sm font-medium text-slate-700 mb-1">
-                    Longitude
-                  </label>
-                  <input
-                    id="lng"
-                    type="number"
-                    step="any"
-                    {...register('lng', { 
-                      required: 'Longitude is required',
-                      min: { value: -180, message: 'Min value is -180' },
-                      max: { value: 180, message: 'Max value is 180' }
-                    })}
-                    className={`w-full px-3 py-2 border ${errors.lng ? 'border-red-500' : 'border-slate-300'} rounded-md`}
-                    placeholder="e.g., -87.6298"
-                  />
-                  {errors.lng && (
-                    <p className="text-red-500 text-xs mt-1">{errors.lng.message}</p>
-                  )}
-                </div>
-              </div>
 
               <div className="mb-4">
                 <label htmlFor="description" className="block text-sm font-medium text-slate-700 mb-1">
