@@ -8,13 +8,16 @@ import { getCityFromCoords } from '../../utils/helpers';
 interface PhotoUploadProps {
   userId: string;
   onSuccess?: () => void;
+  adminMode?: boolean;
 }
 
 interface FormValues {
   caption: string;
 }
 
-const PhotoUpload: React.FC<PhotoUploadProps> = ({ userId, onSuccess }) => {
+const PhotoUpload: React.FC<PhotoUploadProps> = ({ userId, onSuccess, adminMode }) => {
+  const [customUserId, setCustomUserId] = useState<string>(userId);
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -90,6 +93,8 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ userId, onSuccess }) => {
   };
 
   const onSubmit = async (data: FormValues) => {
+    const effectiveUserId = adminMode ? customUserId : userId;
+
     if (!selectedFile || !coords) {
       setError('Please select a photo and get your location first');
       return;
@@ -105,7 +110,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ userId, onSuccess }) => {
         location,
         lat: coords.lat,
         lng: coords.lng,
-      }, userId, selectedFile);
+      }, effectiveUserId, selectedFile);
 
       if (photo) {
         reset();
@@ -131,7 +136,23 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({ userId, onSuccess }) => {
         Share a Photo
       </h2>
       
+      {adminMode && (
+        <div className="mb-4">
+          <label htmlFor="user-uuid" className="block text-sm font-medium text-slate-700 mb-1">
+            User UUID
+          </label>
+          <input
+            id="user-uuid"
+            type="text"
+            value={customUserId}
+            onChange={e => setCustomUserId(e.target.value)}
+            className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Enter user UUID"
+          />
+        </div>
+      )}
       <form onSubmit={handleSubmit(onSubmit)}>
+
         {/* File Upload Area */}
         <div className="mb-4">
           <div 

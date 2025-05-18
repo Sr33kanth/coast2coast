@@ -11,3 +11,20 @@ export const checkIsAuthenticated = async () => {
   const { data: { user } } = await supabase.auth.getUser();
   return !!user;
 };
+
+// Supabase Auth Helpers
+export const signInWithEmail = async (email: string, password: string) => {
+  return supabase.auth.signInWithPassword({ email, password });
+};
+
+export const signOut = async () => {
+  return supabase.auth.signOut();
+};
+
+export const getSession = async () => {
+  return supabase.auth.getSession();
+};
+
+export const onAuthStateChange = (callback: (event: string, session: any) => void) => {
+  return supabase.auth.onAuthStateChange(callback);
+};

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Hero from '../components/layout/Hero';
 import MapView from '../components/map/MapView';
-import CheckinForm from '../components/checkins/CheckinForm';
+
 import { formatDate } from '../utils/helpers';
 import { getCheckIns } from '../services/checkins';
 import { getPhotos } from '../services/photos';
@@ -10,7 +10,7 @@ import GuestbookSection from '../components/guestbook/GuestbookSection';
 
 const Home: React.FC = () => {
   // Temporary userId for demo purposes - in a real app, this would come from auth
-  const [userId] = useState<string>('demo-user-id');
+  
   const [checkIns, setCheckIns] = useState([]);
   const [photos, setPhotos] = useState([]);
   const [stats, setStats] = useState({
@@ -91,7 +91,7 @@ const Home: React.FC = () => {
           
           {/* Sidebar */}
           <div className="space-y-8">
-            <CheckinForm userId={userId} />
+            
 
             <div id="current-stats" className="bg-white rounded-xl shadow-md p-6">
               <h3 className="text-xl font-bold mb-4">Trip Stats</h3>
