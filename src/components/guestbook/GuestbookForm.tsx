@@ -7,9 +7,14 @@ import { addGuestbookEntry } from '../../services/guestbook';
 interface FormValues {
   name: string;
   message: string;
+  address?: string;
 }
 
-const GuestbookForm: React.FC<{ onSuccess?: () => void }> = ({ onSuccess }) => {
+interface GuestbookFormProps {
+  onSuccess?: () => void;
+}
+
+const GuestbookForm: React.FC<GuestbookFormProps> = ({ onSuccess }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,10 +30,22 @@ const GuestbookForm: React.FC<{ onSuccess?: () => void }> = ({ onSuccess }) => {
     setError(null);
 
     try {
+      // 1. Create guestbook entry
       const entry = await addGuestbookEntry({
         name: data.name,
         message: data.message
       });
+
+      // 2. If address is provided, create address entry
+      if (entry && data.address && data.address.trim() !== "") {
+        await import('../../services/guestbook').then(({ addGuestbookAddress }) =>
+          addGuestbookAddress({
+            guestbook_entry_id: entry.id,
+            name: data.name,
+            address: data.address!.trim()
+          })
+        );
+      }
 
       if (entry) {
         reset();
@@ -76,7 +93,7 @@ const GuestbookForm: React.FC<{ onSuccess?: () => void }> = ({ onSuccess }) => {
             id="message"
             {...register('message', { 
               required: 'Message is required',
-              minLength: { value: 10, message: 'Message must be at least 10 characters' } 
+              minLength: { value: 5, message: 'Message must be at least 5 characters' } 
             })}
             className={`w-full px-3 py-2 border ${errors.message ? 'border-red-500' : 'border-slate-300'} rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500`}
             rows={4}
@@ -85,6 +102,23 @@ const GuestbookForm: React.FC<{ onSuccess?: () => void }> = ({ onSuccess }) => {
           {errors.message && (
             <p className="text-red-500 text-xs mt-1">{errors.message.message}</p>
           )}
+        </div>
+
+        <div className="mb-6 p-4 bg-pink-50 rounded-lg border border-pink-200">
+          <div className="flex items-center mb-2">
+            <span className="text-purple-600 text-lg mr-2">📬</span>
+            <span className="font-medium text-slate-700">Want a postcard from our trip?</span>
+          </div>
+          <div className="italic text-slate-500 text-sm mb-2">Drop your address below! (We promise, only good vibes in your mailbox 🎉)</div>
+          <textarea
+            id="address"
+            rows={3}
+            {...register('address')}
+            className="w-full px-3 py-3 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-400 focus:border-pink-400 bg-pink-50 placeholder-pink-400 resize-none text-base"
+            placeholder="123 Happy Lane, Fun Town, USA"
+            autoComplete="street-address"
+          />
+          <div className="text-xs text-slate-400 mt-1">(Optional, only if you want a postcard!)</div>
         </div>
         
         {error && (

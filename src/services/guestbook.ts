@@ -20,6 +20,31 @@ export async function getGuestbookEntries(): Promise<GuestbookEntry[]> {
   }));
 }
 
+export async function addGuestbookAddress(address: { guestbook_entry_id: string; name: string; address: string }): Promise<import('../types').GuestbookAddress | null> {
+  const { data, error } = await supabase
+    .from('guestbook_addresses')
+    .insert([{ ...address }])
+    .select()
+    .single();
+  if (error) {
+    console.error('Error adding guestbook address:', error);
+    return null;
+  }
+  return data;
+}
+
+export async function getGuestbookAddresses(): Promise<import('../types').GuestbookAddress[]> {
+  const { data, error } = await supabase
+    .from('guestbook_addresses')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) {
+    console.error('Error fetching guestbook addresses:', error);
+    return [];
+  }
+  return data;
+}
+
 export async function addGuestbookEntry(entry: Omit<GuestbookEntry, 'id' | 'timestamp'>): Promise<GuestbookEntry | null> {
   const { data, error } = await supabase
     .from('guestbook')
@@ -43,7 +68,7 @@ export async function addGuestbookEntry(entry: Omit<GuestbookEntry, 'id' | 'time
   };
 }
 
-export function subscribeToGuestbook(callback: (entries: GuestbookEntry[]) => void) {
+export function subscribeToGuestbook(callback: (entries: GuestbookEntry[]) => void) { // unchanged
   const subscription = supabase
     .channel('guestbook_changes')
     .on('postgres_changes', {

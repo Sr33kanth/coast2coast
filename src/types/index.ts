@@ -24,6 +24,14 @@ export interface GuestbookEntry {
   timestamp: string;
 }
 
+export interface GuestbookAddress {
+  id: string;
+  guestbook_entry_id: string;
+  name: string;
+  address: string;
+  created_at: string;
+}
+
 export interface RouteStop {
   id: string;
   location: string;
