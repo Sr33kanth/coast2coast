@@ -46,7 +46,11 @@ const currentLocationIcon = L.divIcon({
   popupAnchor: [0, -16],
 });
 
-const MapView: React.FC = () => {
+interface MapViewProps {
+  onRouteDistanceChange?: (miles: number) => void;
+}
+
+const MapView: React.FC<MapViewProps> = ({ onRouteDistanceChange }) => {
   const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [routeStops, setRouteStops] = useState<RouteStop[]>([]);
@@ -127,6 +131,12 @@ const MapView: React.FC = () => {
         // Extract coordinates: [[lng, lat], ...] to [[lat, lng], ...] for Leaflet
         const geometry = data.features[0].geometry.coordinates.map(([lng, lat]: [number, number]) => [lat, lng]);
         setRoutePolyline(geometry);
+        // Extract total distance in meters, convert to miles, and notify parent
+        if (onRouteDistanceChange && data.features[0].properties && typeof data.features[0].properties.summary?.distance === 'number') {
+          const meters = data.features[0].properties.summary.distance;
+          const miles = meters / 1609.34;
+          onRouteDistanceChange(miles);
+        }
       } catch (err) {
         console.error('Error fetching route:', err);
         setRoutePolyline([]);

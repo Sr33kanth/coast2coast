@@ -19,6 +19,7 @@ const Home: React.FC = () => {
     states: 0,
     photos: 0
   });
+  const [roadDistance, setRoadDistance] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,7 +37,7 @@ const Home: React.FC = () => {
         const minDate = new Date(Math.min(...dates));
         const maxDate = new Date(Math.max(...dates));
         daysOnRoad = Math.max(1, Math.ceil((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24)) + 1);
-        // Distance covered: sum of distances between consecutive check-ins
+        // Distance covered: sum of distances between consecutive check-ins (fallback if roadDistance not available)
         const toRad = (deg: number) => deg * Math.PI / 180;
         const haversine = (lat1: number, lon1: number, lat2: number, lon2: number) => {
           const R = 3958.8; // Radius of earth in miles
@@ -58,20 +59,32 @@ const Home: React.FC = () => {
         const stateSet = new Set(
           checkInsData.map(ci => {
             const parts = ci.location.split(',');
-            return parts.length > 1 ? parts[parts.length-1].trim() : '';
+            // Try to extract 2-letter state code or last word
+            let state = parts.length > 1 ? parts[parts.length-1].trim() : '';
+            // If state is not 2 letters, try last word
+            if (state && state.length !== 2) {
+              const words = state.split(' ');
+              state = words[words.length-1];
+            }
+            return state;
           }).filter(Boolean)
         );
         states = stateSet.size;
+        if (states === 0) {
+          // Debug: log check-in locations
+          // eslint-disable-next-line no-console
+          console.log('Check-in locations for state extraction:', checkInsData.map(ci => ci.location));
+        }
       }
       setStats({
         daysOnRoad,
-        distance: Math.round(distance),
+        distance: Math.round(roadDistance ?? distance),
         states,
         photos: photosData.length
       });
     };
     fetchData();
-  }, []);
+  }, [roadDistance]);
   
   return (
     <div className="min-h-screen bg-slate-50">
@@ -84,7 +97,7 @@ const Home: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Map */}
           <div className="lg:col-span-2">
-            <MapView />
+            <MapView onRouteDistanceChange={miles => setRoadDistance(miles)} />
             
             {/* About and Guestbook now moved below grid */}
           </div>
