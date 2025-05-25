@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import L, { LatLngExpression } from 'leaflet';
 import { getCheckIns, subscribeToCheckIns } from '../../services/checkins';
 import { getPhotos, subscribeToPhotos } from '../../services/photos';
 import { getRouteStops, subscribeToRouteStops } from '../../services/routes';
@@ -53,6 +53,7 @@ const MapView: React.FC = () => {
   const [currentLocation, setCurrentLocation] = useState<CheckIn | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([39.8283, -98.5795]); // Center of US
   const [zoomLevel, setZoomLevel] = useState<number>(5);
+  const [routePolyline, setRoutePolyline] = useState<LatLngExpression[]>([]);
   
   // Load initial data and set up subscriptions
   useEffect(() => {
@@ -97,6 +98,43 @@ const MapView: React.FC = () => {
     };
   }, []);
 
+  // Fetch road-following route when checkIns change
+  useEffect(() => {
+    const fetchRoute = async () => {
+      if (checkIns.length < 2) {
+        setRoutePolyline([]);
+        return;
+      }
+      try {
+        const apiKey = import.meta.env.VITE_ORS_API_KEY;
+        if (!apiKey) {
+          console.warn('OpenRouteService API key not set. Route will not be drawn.');
+          setRoutePolyline([]);
+          return;
+        }
+        // Prepare coordinates for ORS API: [lng, lat]
+        const coords = checkIns.map(ci => [ci.lng, ci.lat]);
+        const response = await fetch('https://api.openrouteservice.org/v2/directions/driving-car/geojson', {
+          method: 'POST',
+          headers: {
+            'Authorization': apiKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ coordinates: coords }),
+        });
+        if (!response.ok) throw new Error('Failed to fetch route');
+        const data = await response.json();
+        // Extract coordinates: [[lng, lat], ...] to [[lat, lng], ...] for Leaflet
+        const geometry = data.features[0].geometry.coordinates.map(([lng, lat]: [number, number]) => [lat, lng]);
+        setRoutePolyline(geometry);
+      } catch (err) {
+        console.error('Error fetching route:', err);
+        setRoutePolyline([]);
+      }
+    };
+    fetchRoute();
+  }, [checkIns]);
+
   // Get the preset route coordinates
   const presetRoute = getPresetRouteCoordinates();
 
@@ -112,6 +150,11 @@ const MapView: React.FC = () => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+
+        {/* Route Polyline (road-following) */}
+        {routePolyline.length > 1 && (
+          <Polyline positions={routePolyline} pathOptions={{ color: '#1D4ED8', weight: 5, opacity: 0.8 }} />
+        )}
 
         {/* Route Stops */}
         {routeStops.map((stop) => (
