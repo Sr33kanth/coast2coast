@@ -110,18 +110,11 @@ const MapView: React.FC<MapViewProps> = ({ onRouteDistanceChange }) => {
         return;
       }
       try {
-        const apiKey = import.meta.env.VITE_ORS_API_KEY;
-        if (!apiKey) {
-          console.warn('OpenRouteService API key not set. Route will not be drawn.');
-          setRoutePolyline([]);
-          return;
-        }
         // Prepare coordinates for ORS API: [lng, lat]
         const coords = checkIns.map(ci => [ci.lng, ci.lat]);
-        const response = await fetch('https://api.openrouteservice.org/v2/directions/driving-car/geojson', {
+        const response = await fetch('/.netlify/functions/openrouteservice-proxy', {
           method: 'POST',
           headers: {
-            'Authorization': apiKey,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ coordinates: coords }),
