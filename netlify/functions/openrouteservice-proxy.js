@@ -4,7 +4,11 @@ exports.handler = async function(event, context) {
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
-      body: 'Method Not Allowed',
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ error: 'Method Not Allowed' }),
     };
   }
 
@@ -12,7 +16,11 @@ exports.handler = async function(event, context) {
   if (!ORS_API_KEY) {
     return {
       statusCode: 500,
-      body: 'OpenRouteService API key not set in environment variables.',
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ error: 'OpenRouteService API key not set in environment variables.' }),
     };
   }
 
@@ -22,27 +30,42 @@ exports.handler = async function(event, context) {
   } catch (err) {
     return {
       statusCode: 400,
-      body: 'Invalid JSON body',
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ error: 'Invalid JSON body' }),
     };
   }
 
-  const orsResponse = await fetch('https://api.openrouteservice.org/v2/directions/driving-car/geojson', {
-    method: 'POST',
-    headers: {
-      'Authorization': ORS_API_KEY,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
+  try {
+    const orsResponse = await fetch('https://api.openrouteservice.org/v2/directions/driving-car/geojson', {
+      method: 'POST',
+      headers: {
+        'Authorization': ORS_API_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
 
-  const data = await orsResponse.text();
+    const data = await orsResponse.text();
 
-  return {
-    statusCode: orsResponse.status,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Content-Type': 'application/json',
-    },
-    body: data,
-  };
+    return {
+      statusCode: orsResponse.status,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json',
+      },
+      body: data,
+    };
+  } catch (err) {
+    return {
+      statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ error: 'Failed to fetch from OpenRouteService', details: err.message }),
+    };
+  }
 };
