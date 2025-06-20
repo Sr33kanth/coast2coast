@@ -36,16 +36,7 @@ const GuestbookForm: React.FC<GuestbookFormProps> = ({ onSuccess }) => {
         message: data.message
       });
 
-      // 2. If address is provided, create address entry
-      if (entry && data.address && data.address.trim() !== "") {
-        await import('../../services/guestbook').then(({ addGuestbookAddress }) =>
-          addGuestbookAddress({
-            guestbook_entry_id: entry.id,
-            name: data.name,
-            address: data.address!.trim()
-          })
-        );
-      }
+
 
       if (entry) {
         reset();
@@ -104,22 +95,7 @@ const GuestbookForm: React.FC<GuestbookFormProps> = ({ onSuccess }) => {
           )}
         </div>
 
-        <div className="mb-6 p-4 bg-pink-50 rounded-lg border border-pink-200">
-          <div className="flex items-center mb-2">
-            <span className="text-purple-600 text-lg mr-2">📬</span>
-            <span className="font-medium text-slate-700">Want a postcard from our trip?</span>
-          </div>
-          <div className="italic text-slate-500 text-sm mb-2">Drop your address below! (We promise, only good vibes in your mailbox 🎉)</div>
-          <textarea
-            id="address"
-            rows={3}
-            {...register('address')}
-            className="w-full px-3 py-3 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-400 focus:border-pink-400 bg-pink-50 placeholder-pink-400 resize-none text-base"
-            placeholder="123 Happy Lane, Fun Town, USA"
-            autoComplete="street-address"
-          />
-          <div className="text-xs text-slate-400 mt-1">(Optional, only if you want a postcard!)</div>
-        </div>
+
         
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md">

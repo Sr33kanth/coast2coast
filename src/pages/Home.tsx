@@ -79,7 +79,7 @@ const Home: React.FC = () => {
       setStats({
         daysOnRoad,
         distance: Math.round(roadDistance ?? distance),
-        states,
+        states: 16, // Hardcoded as trip is over
         photos: photosData.length
       });
     };
@@ -108,7 +108,6 @@ const Home: React.FC = () => {
 
             <div id="current-stats" className="bg-white rounded-xl shadow-md p-6">
               <h3 className="text-xl font-bold mb-4">Trip Stats</h3>
-              
               <div className="space-y-4">
                 <div className="flex justify-between items-center pb-2 border-b">
                   <span className="text-slate-600">Days on Road</span>
@@ -128,6 +127,19 @@ const Home: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* TEMP DEBUG: Show all check-in locations */}
+            {checkIns.length > 0 && (
+              <div className="bg-yellow-50 rounded-xl shadow-md p-4 mt-4">
+                <h4 className="font-bold text-yellow-800 mb-2 text-sm">Debug: All Check-in Locations</h4>
+                <ul className="text-xs text-yellow-900 space-y-1">
+                  {checkIns.map((ci, i) => (
+                    <li key={ci.id || i}>{ci.location || <span className="italic text-yellow-600">(no location)</span>}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
           </div>
         </div>
       </div>
