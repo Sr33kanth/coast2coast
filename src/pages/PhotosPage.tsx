@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PhotoGallery from '../components/photos/PhotoGallery';
 
 import { Camera } from 'lucide-react';

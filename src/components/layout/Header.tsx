@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Map, Camera, MessageSquare, Route, Menu, X } from 'lucide-react';
+import { Map, Camera, Menu, X } from 'lucide-react';
 import Button from '../ui/Button';
 
 const Header: React.FC = () => {
@@ -11,7 +11,6 @@ const Header: React.FC = () => {
 
   const navItems = [
     { name: 'Photos', path: '/photos', icon: <Camera className="w-5 h-5" /> },
-    { name: 'Admin', path: '/admin', icon: <Route className="w-5 h-5" /> },
   ];
 
   useEffect(() => {

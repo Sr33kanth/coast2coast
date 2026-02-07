@@ -3,7 +3,7 @@ import { formatDateTime } from '../../utils/helpers';
 import { motion } from 'framer-motion';
 import Card, { CardContent } from '../ui/Card';
 import type { GuestbookEntry } from '../../types';
-import { getGuestbookEntries, subscribeToGuestbook } from '../../services/guestbook';
+import { getGuestbookEntries } from '../../services/guestbook';
 
 const GuestbookList: React.FC = () => {
   const [entries, setEntries] = useState<GuestbookEntry[]>([]);
@@ -22,10 +22,6 @@ const GuestbookList: React.FC = () => {
     };
 
     loadEntries();
-
-    // Set up real-time subscription
-    const unsubscribe = subscribeToGuestbook(setEntries);
-    return unsubscribe;
   }, []);
 
   if (isLoading) {
@@ -40,7 +36,6 @@ const GuestbookList: React.FC = () => {
     return (
       <div className="text-center py-8 bg-white rounded-xl shadow-sm">
         <h3 className="text-lg font-medium text-slate-500">No guestbook entries yet</h3>
-        <p className="text-slate-400">Be the first to leave a message!</p>
       </div>
     );
   }

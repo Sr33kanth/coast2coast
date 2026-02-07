@@ -23,27 +23,3 @@ export interface GuestbookEntry {
   message: string;
   timestamp: string;
 }
-
-export interface GuestbookAddress {
-  id: string;
-  guestbook_entry_id: string;
-  name: string;
-  address: string;
-  created_at: string;
-}
-
-export interface RouteStop {
-  id: string;
-  location: string;
-  lat: number;
-  lng: number;
-  planned_date?: string;
-  visited: boolean;
-  description?: string;
-}
-
-export interface User {
-  id: string;
-  name: string;
-  avatar_url?: string;
-}
